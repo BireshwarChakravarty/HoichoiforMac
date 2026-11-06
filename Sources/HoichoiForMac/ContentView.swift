@@ -194,7 +194,7 @@ private struct WindowFullScreenObserver: NSViewRepresentable {
             observers = [
                 center.addObserver(forName: NSWindow.willEnterFullScreenNotification, object: window, queue: .main) { _ in update(true) },
                 center.addObserver(forName: NSWindow.willExitFullScreenNotification, object: window, queue: .main) { _ in update(false) },
-                center.addObserver(forName: NSWindow.didFailToEnterFullScreenNotification, object: window, queue: .main) { _ in update(false) },
+                center.addObserver(forName: NSWindow.didExitFullScreenNotification, object: window, queue: .main) { _ in update(false) },
             ]
             update(window.styleMask.contains(.fullScreen))
         }
