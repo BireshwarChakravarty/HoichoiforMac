@@ -15,6 +15,8 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
         } detail: {
             BrowserView()
+                // Without this, an empty title bar strip stays at the top in full screen.
+                .ignoresSafeArea(.container, edges: isFullScreen ? .top : [])
                 .toolbar { toolbarContent }
                 // In full screen the video gets the whole display: no toolbar,
                 // no title bar strip, no sidebar.

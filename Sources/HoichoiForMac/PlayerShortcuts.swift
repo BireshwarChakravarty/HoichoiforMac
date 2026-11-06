@@ -65,15 +65,70 @@ enum PlayerShortcuts {
                candidates.sort((a, b) => area(b) - area(a))[0];
       };
 
-      // F uses the app's own edge-to-edge full screen (window full screen with
-      // the toolbar and sidebar hidden). If the site put an element into
-      // full screen itself, F leaves that instead.
-      const toggleFullscreen = () => {
+      // F does what the player's own full screen button does, so the site switches
+      // to its full screen layout (no margins, title or back arrow), and WebKit
+      // shows that element edge to edge. If the button can't be found, request
+      // full screen on the player container; if that doesn't take effect,
+      // fall back to the app's window full screen.
+      const labelOf = (el) => {
+        const cls = typeof el.className === 'string' ? el.className : ((el.className && el.className.baseVal) || '');
+        return [el.getAttribute('aria-label'), el.getAttribute('title'), el.getAttribute('data-title'),
+                el.getAttribute('data-testid'), cls, el.id].join(' ').toLowerCase();
+      };
+
+      const findFullscreenButton = (video) => {
+        const root = video.closest('[class*="player" i], [id*="player" i]') || document;
+        const candidates = Array.from(root.querySelectorAll(
+          'button, [role="button"], [aria-label], [title], [class*="full" i], [data-testid]'
+        )).filter((el) => {
+          const label = labelOf(el);
+          return /full[\\s_-]?screen|maximi[sz]e/.test(label) && !/exit|minimi[sz]e/.test(label);
+        });
+        const visible = (el) => el.getClientRects().length > 0;
+        const hit = candidates.find(visible) || candidates[0];
+        return hit ? (hit.closest('button, [role="button"]') || hit) : null;
+      };
+
+      const requestOn = (target) => {
+        const request = target.requestFullscreen || target.webkitRequestFullscreen;
+        if (!request) { return false; }
+        const result = request.call(target);
+        if (result && result.catch) { result.catch(() => {}); }
+        return true;
+      };
+
+      const playerContainer = (video) => {
+        let target = video.parentElement || video;
+        for (let n = video.parentElement; n && n !== document.body; n = n.parentElement) {
+          if (!(n.clientWidth >= video.clientWidth && n.clientHeight >= video.clientHeight)) { break; }
+          target = n;
+          if (/player/i.test(labelOf(n))) { break; }
+        }
+        return target;
+      };
+
+      const toggleFullscreen = (video) => {
         if (isFullscreen()) {
           (document.exitFullscreen || document.webkitExitFullscreen).call(document);
           return;
         }
-        send({ command: 'toggleFullScreen' });
+        const button = findFullscreenButton(video);
+        if (button) {
+          if (typeof button.click === 'function') { button.click(); }
+          else { button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); }
+        }
+        if (!isFullscreen() && !button) {
+          requestOn(playerContainer(video));
+        }
+        setTimeout(() => {
+          if (!isFullscreen()) {
+            if (button && requestOn(playerContainer(video))) {
+              setTimeout(() => { if (!isFullscreen()) { send({ command: 'toggleFullScreen' }); } }, 600);
+            } else {
+              send({ command: 'toggleFullScreen' });
+            }
+          }
+        }, 600);
       };
 
       const togglePictureInPicture = (video) => {
@@ -140,7 +195,7 @@ enum PlayerShortcuts {
             message = video.muted ? 'Muted' : 'Sound on';
             break;
           case 'f':
-            toggleFullscreen();
+            toggleFullscreen(video);
             break;
           case 'p':
             togglePictureInPicture(video);
