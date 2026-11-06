@@ -50,6 +50,11 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
         run: ./scripts/build-app.sh
 
+      - name: Check icon conversion script
+        run: |
+          ./scripts/png-to-icns.sh Resources/AppIcon.png "$RUNNER_TEMP/test.icns"
+          test -s "$RUNNER_TEMP/test.icns"
+
       - name: Add version-less copies for "latest" download links
         run: |
           cp dist/Hoichoi-for-Mac-*.dmg dist/Hoichoi-for-Mac.dmg

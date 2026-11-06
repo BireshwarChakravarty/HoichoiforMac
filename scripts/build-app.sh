@@ -30,7 +30,24 @@ echo "==> Assembling $APP"
 rm -rf "build/Hoichoi for Mac.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/$EXECUTABLE" "$APP/Contents/MacOS/$EXECUTABLE"
-cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+ICON="Resources/AppIcon.icns"
+# Personal icon override for local builds only. Resources/Custom/ is git-ignored,
+# and CI never uses it, so a custom icon can't end up in a public release.
+if [[ -z "${CI:-}" ]]; then
+    if [[ -f Resources/Custom/AppIcon.icns ]]; then
+        ICON="Resources/Custom/AppIcon.icns"
+    else
+        for candidate in Resources/Custom/AppIcon.png Resources/Custom/AppIcon.jpg Resources/Custom/AppIcon.jpeg; do
+            if [[ -f "$candidate" ]]; then
+                ./scripts/png-to-icns.sh "$candidate" build/CustomAppIcon.icns "${CUSTOM_ICON_BACKGROUND:-FFFFFF}"
+                ICON="build/CustomAppIcon.icns"
+                break
+            fi
+        done
+    fi
+fi
+echo "    icon: $ICON"
+cp "$ICON" "$APP/Contents/Resources/AppIcon.icns"
 sed -e "s/__VERSION__/$VERSION/g" -e "s/__BUILD__/$BUILD_NUMBER/g" \
     Resources/Info.plist > "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"

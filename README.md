@@ -83,6 +83,17 @@ make run
 
 You can also open `Package.swift` in Xcode and press Run.
 
+### Use your own icon (personal builds)
+
+You can give your own copy of the app a different icon:
+
+1. Put a PNG or JPEG at `Resources/Custom/AppIcon.png`. A ready-made `.icns` also works, saved as `Resources/Custom/AppIcon.icns`.
+   Wide images such as wordmarks are centred on a white square. To use a different background colour, set it as a hex value, for example `CUSTOM_ICON_BACKGROUND=000000 make run`.
+2. Run `make run`.
+
+`Resources/Custom/` is git-ignored, and CI builds never use it, so a personal icon never ends up in the repository or in a public release.
+If you use another company's logo this way, keep that build to yourself.
+
 ## How it works
 
 The app uses Swift Package Manager and has no third-party dependencies.

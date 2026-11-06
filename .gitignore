@@ -5,3 +5,6 @@ build/
 dist/
 *.xcodeproj/xcuserdata/
 DerivedData/
+
+# Personal app icon for local builds (see README). Never committed.
+Resources/Custom/

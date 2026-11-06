@@ -1,78 +1,140 @@
 #!/usr/bin/env python3
-"""Generate Resources/AppIcon.icns (an original icon, not hoichoi's logo).
+"""Generate Resources/AppIcon.icns and Resources/AppIcon.png.
 
-Requires Pillow:  python3 -m pip install pillow
-Usage:            python3 scripts/make_icon.py
+The icon is an original design: a warm red gradient tile with the Bengali
+letter "হ" (ho) and a small play mark. It deliberately does not reproduce
+hoichoi's logo or wordmark.
+
+Requires Pillow (python3 -m pip install pillow) and a font with Bengali
+glyphs. GNU FreeSans is used by default (Debian/Ubuntu: fonts-freefont-ttf);
+pass another font path as the first argument to override.
+
+Usage:  python3 scripts/make_icon.py [path/to/font.ttf]
 """
 import io
 import struct
+import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "Resources" / "AppIcon.icns"
+OUT_ICNS = ROOT / "Resources" / "AppIcon.icns"
+OUT_PNG = ROOT / "Resources" / "AppIcon.png"
 SIZE = 1024
+TILE = 824  # macOS Big Sur icon grid: 824px tile centred on a 1024px canvas
+RADIUS = 185
+GLYPH = "হ"  # Bengali letter HA (হ)
+
+FONT_CANDIDATES = [
+    "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+    "/Library/Fonts/FreeSans.ttf",
+    "/System/Library/Fonts/Supplemental/Bangla Sangam MN.ttc",
+    "/System/Library/Fonts/KohinoorBangla.ttc",
+]
+
+# Diagonal gradient stops (top-left -> bottom-right): amber, coral red, crimson, plum.
+STOPS = [
+    (0.00, (255, 159, 67)),
+    (0.35, (247, 68, 60)),
+    (0.70, (206, 22, 72)),
+    (1.00, (112, 16, 82)),
+]
 
 
 def lerp(a, b, t):
     return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
 
 
+def gradient(size: int) -> Image.Image:
+    # Build a 1-D ramp, then stretch it along the diagonal (fast, no per-pixel loop).
+    n = 512
+    ramp = Image.new("RGB", (n, 1))
+    for i in range(n):
+        t = i / (n - 1)
+        for (t0, c0), (t1, c1) in zip(STOPS, STOPS[1:]):
+            if t <= t1:
+                ramp.putpixel((i, 0), lerp(c0, c1, (t - t0) / (t1 - t0)))
+                break
+    diag = int(size * 1.4143) + 2
+    band = ramp.resize((diag, diag), Image.BICUBIC).rotate(-45, resample=Image.BICUBIC)
+    off = (diag - size) // 2
+    return band.crop((off, off, off + size, off + size)).convert("RGBA")
+
+
+def load_font(px: int) -> ImageFont.FreeTypeFont:
+    paths = [sys.argv[1]] if len(sys.argv) > 1 else FONT_CANDIDATES
+    for path in paths:
+        try:
+            font = ImageFont.truetype(path, px)
+        except OSError:
+            continue
+        # Reject fonts that render the glyph as a missing-glyph box.
+        if font.getmask(GLYPH).getbbox() != font.getmask("￿").getbbox():
+            return font
+    sys.exit("No font with Bengali glyphs found; pass one as the first argument.")
+
+
 def render() -> Image.Image:
-    img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    canvas = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    off = (SIZE - TILE) // 2
 
-    # macOS-style squircle-ish tile with margins (Big Sur grid: 824px tile).
-    tile = 824
-    off = (SIZE - tile) // 2
-    radius = 185
+    mask = Image.new("L", (TILE, TILE), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, TILE - 1, TILE - 1), RADIUS, fill=255)
 
-    # Diagonal gradient: warm red -> deep magenta -> indigo.
-    stops = [(0.0, (255, 84, 62)), (0.55, (214, 30, 96)), (1.0, (74, 22, 120))]
-    grad = Image.new("RGBA", (tile, tile))
-    px = grad.load()
-    for y in range(tile):
-        for x in range(tile):
-            t = (x + y) / (2 * (tile - 1))
-            for (t0, c0), (t1, c1) in zip(stops, stops[1:]):
-                if t <= t1:
-                    px[x, y] = lerp(c0, c1, (t - t0) / (t1 - t0)) + (255,)
-                    break
-
-    mask = Image.new("L", (tile, tile), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, tile - 1, tile - 1), radius, fill=255)
-
-    # Soft drop shadow.
+    # Soft drop shadow under the tile.
     shadow = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle(
-        (off, off + 18, off + tile, off + tile + 18), radius, fill=(0, 0, 0, 110)
+        (off, off + 16, off + TILE, off + TILE + 16), RADIUS, fill=(40, 0, 20, 120)
     )
-    shadow = shadow.filter(ImageFilter.GaussianBlur(22))
-    img.alpha_composite(shadow)
+    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(22)))
 
-    img.paste(grad, (off, off), mask)
+    tile = gradient(TILE)
 
-    # Subtle top highlight.
-    hl = Image.new("RGBA", (tile, tile), (0, 0, 0, 0))
-    ImageDraw.Draw(hl).ellipse((-tile * 0.3, -tile * 0.75, tile * 1.3, tile * 0.45), fill=(255, 255, 255, 34))
-    hl_masked = Image.new("RGBA", (tile, tile), (0, 0, 0, 0))
-    hl_masked.paste(hl, (0, 0), mask)
-    img.alpha_composite(hl_masked, (off, off))
+    # Gentle radial glow in the upper-left for depth.
+    glow = Image.new("L", (TILE, TILE), 0)
+    ImageDraw.Draw(glow).ellipse((-TILE * 0.35, -TILE * 0.35, TILE * 0.75, TILE * 0.75), fill=70)
+    glow = glow.filter(ImageFilter.GaussianBlur(120))
+    tile = Image.composite(Image.new("RGBA", tile.size, (255, 236, 200, 255)), tile, glow)
 
-    # Rounded play triangle.
-    d = ImageDraw.Draw(img)
-    cx, cy = SIZE / 2 + 28, SIZE / 2
-    h = 330
+    # --- Foreground: the letter হ, made bold with a stroke, plus a play mark.
+    fg = Image.new("L", (TILE, TILE), 0)
+    font = load_font(560)
+    d = ImageDraw.Draw(fg)
+    bbox = d.textbbox((0, 0), GLYPH, font=font, stroke_width=26)
+    gw, gh = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    gx = (TILE - gw) / 2 - bbox[0] - 40
+    gy = (TILE - gh) / 2 - bbox[1] - 10
+    d.text((gx, gy), GLYPH, font=font, fill=255, stroke_width=26, stroke_fill=255)
+
+    # Play triangle tucked into the lower-right of the letter.
+    cx, cy, h = TILE * 0.73, TILE * 0.70, TILE * 0.20
     w = h * 0.9
-    tri = [(cx - w / 2, cy - h / 2), (cx - w / 2, cy + h / 2), (cx + w / 2, cy)]
-    tri_layer = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    ImageDraw.Draw(tri_layer).polygon(tri, fill=(255, 255, 255, 255))
-    tri_layer = tri_layer.filter(ImageFilter.GaussianBlur(10))
-    alpha = tri_layer.getchannel("A").point(lambda a: 255 if a > 140 else 0)
-    white = Image.new("RGBA", (SIZE, SIZE), (255, 255, 255, 255))
-    img.paste(white, (0, 0), alpha)
-    del d
-    return img
+    tri = Image.new("L", (TILE, TILE), 0)
+    ImageDraw.Draw(tri).polygon(
+        [(cx - w / 2, cy - h / 2), (cx - w / 2, cy + h / 2), (cx + w / 2, cy)], fill=255
+    )
+    tri = tri.filter(ImageFilter.GaussianBlur(7)).point(lambda a: 255 if a > 140 else 0)
+    # Cut a gap around the triangle out of the letter so the two read separately.
+    gap = tri.filter(ImageFilter.MaxFilter(41))
+    fg = ImageChops.subtract(fg, gap)
+    fg = ImageChops.lighter(fg, tri)
+
+    # Smooth the edges a touch.
+    fg = fg.filter(ImageFilter.GaussianBlur(1.2))
+
+    # Subtle shadow beneath the white artwork.
+    fg_shadow = fg.filter(ImageFilter.GaussianBlur(14)).point(lambda a: a * 0.35)
+    shadow_layer = Image.new("RGBA", tile.size, (90, 0, 30, 255))
+    shadow_layer.putalpha(fg_shadow)
+    tile.alpha_composite(shadow_layer, (0, 10))
+
+    white = Image.new("RGBA", tile.size, (255, 255, 255, 255))
+    white.putalpha(fg)
+    tile.alpha_composite(white)
+
+    canvas.paste(tile, (off, off), mask)
+    return canvas
 
 
 def png_bytes(img: Image.Image, size: int) -> bytes:
@@ -92,9 +154,9 @@ def main() -> None:
     for kind, size in entries:
         data = png_bytes(base, size)
         chunks += kind + struct.pack(">I", len(data) + 8) + data
-    OUT.write_bytes(b"icns" + struct.pack(">I", len(chunks) + 8) + chunks)
-    base.save(ROOT / "Resources" / "AppIcon.png")
-    print(f"wrote {OUT}")
+    OUT_ICNS.write_bytes(b"icns" + struct.pack(">I", len(chunks) + 8) + chunks)
+    base.save(OUT_PNG)
+    print(f"wrote {OUT_ICNS} and {OUT_PNG}")
 
 
 if __name__ == "__main__":
