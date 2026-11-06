@@ -48,6 +48,29 @@ ZIP="dist/Hoichoi-for-Mac-$VERSION.zip"
 rm -f "$ZIP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 
+echo "==> Creating disk image"
+# Stage the app next to an /Applications shortcut so users can drag-install.
+rm -rf "build/dmg-staging"
+mkdir -p "build/dmg-staging"
+ditto "$APP" "build/dmg-staging/Hoichoi for Mac.app"
+ln -s /Applications "build/dmg-staging/Applications"
+DMG="dist/Hoichoi-for-Mac-$VERSION.dmg"
+rm -f "$DMG"
+hdiutil create \
+    -volname "Hoichoi for Mac" \
+    -srcfolder "build/dmg-staging" \
+    -fs HFS+ \
+    -format UDZO \
+    -imagekey zlib-level=9 \
+    -ov \
+    "$DMG"
+rm -rf "build/dmg-staging"
+if [[ "$CODESIGN_IDENTITY" != "-" ]]; then
+    codesign --force --sign "$CODESIGN_IDENTITY" --timestamp "$DMG"
+fi
+hdiutil verify "$DMG"
+
 echo
 echo "Built: $APP"
 echo "Zip:   $ZIP"
+echo "DMG:   $DMG"

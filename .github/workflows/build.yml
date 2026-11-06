@@ -37,15 +37,35 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
         run: ./scripts/build-app.sh
 
+      - name: Add version-less copies for "latest" download links
+        run: |
+          cp dist/Hoichoi-for-Mac-*.dmg dist/Hoichoi-for-Mac.dmg
+          cp dist/Hoichoi-for-Mac-*.zip dist/Hoichoi-for-Mac.zip
+          ls -la dist
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: Hoichoi-for-Mac-${{ steps.version.outputs.version }}
-          path: dist/*.zip
+          path: |
+            dist/Hoichoi-for-Mac-*.dmg
+            dist/Hoichoi-for-Mac-*.zip
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.zip
+          name: Hoichoi for Mac ${{ steps.version.outputs.version }}
+          files: |
+            dist/*.dmg
+            dist/*.zip
           generate_release_notes: true
+          body: |
+            Unofficial, open-source native macOS app for hoichoi. Requires macOS 13 Ventura or later (Apple silicon and Intel).
+
+            **Install:** download `Hoichoi-for-Mac.dmg`, open it and drag **Hoichoi for Mac** into **Applications**.
+
+            The app is ad-hoc signed, not notarized, so the first time you open it macOS will block it. Right-click the app → **Open** → **Open**. On macOS 15+, use **System Settings → Privacy & Security → Open Anyway**. Or run:
+            ```
+            xattr -dr com.apple.quarantine "/Applications/Hoichoi for Mac.app"
+            ```

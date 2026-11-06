@@ -48,9 +48,9 @@ keyboard shortcuts and conveniences you'd expect from a Mac app.
 
 ### Download a build
 
-1. Download the latest `Hoichoi-for-Mac-x.y.z.zip` from [Releases](https://github.com/BireshwarChakravarty/HoichoiforMac/releases).
-   You can also take the zip from the newest successful run on the [Actions](https://github.com/BireshwarChakravarty/HoichoiforMac/actions) tab.
-2. Unzip it and drag **Hoichoi for Mac.app** to `/Applications`.
+1. Download **[Hoichoi-for-Mac.dmg](https://github.com/BireshwarChakravarty/HoichoiforMac/releases/latest/download/Hoichoi-for-Mac.dmg)**, which is always the latest release.
+   You can also browse all versions, including zip downloads, on the [Releases](https://github.com/BireshwarChakravarty/HoichoiforMac/releases) page.
+2. Open the DMG and drag **Hoichoi for Mac** into **Applications**.
 3. The app is ad-hoc signed, not notarized by Apple, so Gatekeeper will block it the first time. Do one of the following:
    - Right-click the app and choose **Open**, then click **Open** again. On macOS 15, go to **System Settings → Privacy & Security** and click **Open Anyway**.
    - Or run this in Terminal:
@@ -77,7 +77,7 @@ make run
 
 `make run` builds the app for your Mac's architecture into `build/Hoichoi for Mac.app` and opens it. Other targets:
 
-- `make app` builds a universal (Apple silicon + Intel) app and a zip in `dist/`.
+- `make app` builds a universal (Apple silicon + Intel) app, plus a zip and a DMG in `dist/`.
 - `make debug` runs a debug build with `swift run`. The Safari Web Inspector is enabled in debug builds.
 - `make icon` regenerates the app icon (needs Pillow).
 
