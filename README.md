@@ -37,7 +37,7 @@ While a video is playing, the app uses simple single-key controls, like Netflix:
 | ← / → | Back / forward 10 seconds |
 | ↑ / ↓ | Volume up / down |
 | M | Mute / unmute |
-| F | Full screen (Esc to exit) |
+| F | Full screen, edge to edge (Esc to exit) |
 | P | Picture in Picture |
 
 These keys only act on the main player. They don't fire while you type in a search box, and they don't affect looping preview clips.

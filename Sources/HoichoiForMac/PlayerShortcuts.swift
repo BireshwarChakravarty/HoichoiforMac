@@ -8,7 +8,7 @@ import WebKit
 /// | ← / →          | Back / forward 10 s     |
 /// | ↑ / ↓          | Volume up / down        |
 /// | M              | Mute / unmute           |
-/// | F              | Full screen             |
+/// | F              | Full screen (Esc exits) |
 /// | P              | Picture in Picture      |
 ///
 /// They only act when a real player is on screen (not a small or looping
@@ -33,9 +33,10 @@ enum PlayerShortcuts {
       if (window.__hoichoiForMacShortcuts) { return; }
       window.__hoichoiForMacShortcuts = true;
 
-      const notify = (text) => {
-        try { window.webkit.messageHandlers.\(messageName).postMessage(text); } catch (e) {}
+      const send = (body) => {
+        try { window.webkit.messageHandlers.\(messageName).postMessage(body); } catch (e) {}
       };
+      const notify = (text) => send({ toast: text });
 
       const isTyping = (el) => {
         if (!el) { return false; }
@@ -64,26 +65,15 @@ enum PlayerShortcuts {
                candidates.sort((a, b) => area(b) - area(a))[0];
       };
 
-      const toggleFullscreen = (video) => {
+      // F uses the app's own edge-to-edge full screen (window full screen with
+      // the toolbar and sidebar hidden). If the site put an element into
+      // full screen itself, F leaves that instead.
+      const toggleFullscreen = () => {
         if (isFullscreen()) {
           (document.exitFullscreen || document.webkitExitFullscreen).call(document);
           return;
         }
-        // Prefer the player container (keeps the site's controls and subtitles).
-        let target = video.parentElement || video;
-        for (let n = video.parentElement; n && n !== document.body; n = n.parentElement) {
-          const sameSize = n.clientWidth >= video.clientWidth && n.clientHeight >= video.clientHeight &&
-                           n.clientHeight <= video.clientHeight * 1.5 + 120;
-          if (!sameSize) { break; }
-          target = n;
-        }
-        const request = target.requestFullscreen || target.webkitRequestFullscreen;
-        if (request) {
-          const result = request.call(target);
-          if (result && result.catch) { result.catch(() => {}); }
-        } else if (video.webkitEnterFullscreen) {
-          video.webkitEnterFullscreen();
-        }
+        send({ command: 'toggleFullScreen' });
       };
 
       const togglePictureInPicture = (video) => {
@@ -107,6 +97,13 @@ enum PlayerShortcuts {
       window.addEventListener('keydown', (event) => {
         if (event.metaKey || event.ctrlKey || event.altKey) { return; }
         if (isTyping(event.target) || isTyping(document.activeElement)) { return; }
+
+        // Esc leaves the app's full screen (macOS doesn't do that by default).
+        // Not swallowed, so the site can still use Esc for its own menus.
+        if (event.key === 'Escape' && !isFullscreen()) {
+          send({ command: 'exitFullScreen' });
+          return;
+        }
 
         const video = findPlayer();
         if (!video) { return; }
@@ -143,7 +140,7 @@ enum PlayerShortcuts {
             message = video.muted ? 'Muted' : 'Sound on';
             break;
           case 'f':
-            toggleFullscreen(video);
+            toggleFullscreen();
             break;
           case 'p':
             togglePictureInPicture(video);
@@ -173,7 +170,21 @@ final class ScriptMessageProxy: NSObject, WKScriptMessageHandler {
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == PlayerShortcuts.messageName, let text = message.body as? String else { return }
-        model?.showToast(text)
+        guard message.name == PlayerShortcuts.messageName,
+              let body = message.body as? [String: Any],
+              let model = self.model
+        else { return }
+
+        if let text = body["toast"] as? String {
+            model.showToast(text)
+        }
+        switch body["command"] as? String {
+        case "toggleFullScreen"?:
+            model.toggleFullScreen()
+        case "exitFullScreen"?:
+            model.exitFullScreen()
+        default:
+            break
+        }
     }
 }

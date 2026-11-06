@@ -118,6 +118,20 @@ final class BrowserModel: NSObject, ObservableObject {
     func zoomOut() { webView.pageZoom = max(webView.pageZoom - 0.1, 0.5) }
     func resetZoom() { webView.pageZoom = 1.0 }
 
+    // MARK: - Full screen
+
+    var isWindowFullScreen: Bool {
+        webView.window?.styleMask.contains(.fullScreen) ?? false
+    }
+
+    func toggleFullScreen() {
+        webView.window?.toggleFullScreen(nil)
+    }
+
+    func exitFullScreen() {
+        if isWindowFullScreen { toggleFullScreen() }
+    }
+
     // MARK: - Sharing
 
     func copyCurrentLink() {

@@ -1,18 +1,36 @@
+import AppKit
 import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var browser: BrowserModel
     @EnvironmentObject private var library: LibraryStore
 
+    @State private var columnVisibility = NavigationSplitViewVisibility.automatic
+    @State private var visibilityBeforeFullScreen: NavigationSplitViewVisibility?
+    @State private var isFullScreen = false
+
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
         } detail: {
             BrowserView()
                 .toolbar { toolbarContent }
+                // In full screen the video gets the whole display: no toolbar,
+                // no title bar strip, no sidebar.
+                .toolbar(isFullScreen ? .hidden : .visible, for: .windowToolbar)
         }
         .navigationTitle(browser.title)
+        .background(WindowFullScreenObserver(isFullScreen: $isFullScreen))
+        .onChange(of: isFullScreen) { fullScreen in
+            if fullScreen {
+                visibilityBeforeFullScreen = columnVisibility
+                columnVisibility = .detailOnly
+            } else {
+                columnVisibility = visibilityBeforeFullScreen ?? .automatic
+                visibilityBeforeFullScreen = nil
+            }
+        }
         .onAppear {
             let store = self.library
             let model = self.browser
@@ -130,5 +148,55 @@ struct LoadErrorView: View {
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.background)
+    }
+}
+
+/// Reports whether the hosting window is in macOS full screen. Flips as the
+/// transition *starts*, so the chrome is already gone when the animation ends.
+private struct WindowFullScreenObserver: NSViewRepresentable {
+    @Binding var isFullScreen: Bool
+
+    func makeCoordinator() -> Coordinator { Coordinator(isFullScreen: $isFullScreen) }
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async { context.coordinator.attach(to: view.window) }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async { context.coordinator.attach(to: nsView.window) }
+    }
+
+    final class Coordinator {
+        private var isFullScreen: Binding<Bool>
+        private weak var window: NSWindow?
+        private var observers: [NSObjectProtocol] = []
+
+        init(isFullScreen: Binding<Bool>) {
+            self.isFullScreen = isFullScreen
+        }
+
+        deinit {
+            observers.forEach { NotificationCenter.default.removeObserver($0) }
+        }
+
+        func attach(to window: NSWindow?) {
+            guard let window, window !== self.window else { return }
+            observers.forEach { NotificationCenter.default.removeObserver($0) }
+            self.window = window
+
+            let center = NotificationCenter.default
+            let update: (Bool) -> Void = { [weak self] value in
+                guard let self, self.isFullScreen.wrappedValue != value else { return }
+                self.isFullScreen.wrappedValue = value
+            }
+            observers = [
+                center.addObserver(forName: NSWindow.willEnterFullScreenNotification, object: window, queue: .main) { _ in update(true) },
+                center.addObserver(forName: NSWindow.willExitFullScreenNotification, object: window, queue: .main) { _ in update(false) },
+                center.addObserver(forName: NSWindow.didFailToEnterFullScreenNotification, object: window, queue: .main) { _ in update(false) },
+            ]
+            update(window.styleMask.contains(.fullScreen))
+        }
     }
 }
