@@ -1,36 +1,49 @@
 # Hoichoi for Mac
 
-An open-source, native macOS app for watching [hoichoi](https://www.hoichoi.tv) — Bengali movies and web series — outside the browser.
+A native macOS app for watching [hoichoi](https://www.hoichoi.tv), the Bengali movie and web series service, outside the browser. Free and open source.
 
-> **Unofficial.** This project is not made, endorsed or supported by hoichoi or SVF Entertainment.
-> You still need your own hoichoi account and subscription. The app doesn't download, rip or
-> redistribute anything. It's a dedicated Mac window for the official website.
+<p align="center"><img src="Resources/AppIcon.png" width="160" alt="Hoichoi for Mac icon"></p>
 
-<p align="center"><img src="Resources/AppIcon.png" width="160" alt="App icon"></p>
+<p align="center">
+  <a href="https://github.com/BireshwarChakravarty/HoichoiforMac/releases/latest/download/Hoichoi-for-Mac.dmg"><b>Download for Mac</b></a>
+  · macOS 13 Ventura or later · Apple silicon and Intel
+</p>
 
-## Why
-
-hoichoi has apps for iPhone, iPad, Android and TVs, but not for the Mac. On a Mac you're stuck with a
-browser tab. This app gives hoichoi its own window, Dock icon and menu bar, and adds the
-keyboard shortcuts and conveniences you'd expect from a Mac app.
+> **Unofficial.** This app isn't made, endorsed or supported by hoichoi or SVF Entertainment.
+> You need your own hoichoi account and subscription. The app doesn't download, rip or
+> redistribute anything. It shows the official hoichoi website in its own Mac window.
 
 ## Features
 
-- **Native SwiftUI app.** Has its own window and Dock icon, a sidebar, a toolbar, a Settings window, full-screen support and light/dark mode.
-- **Uses Safari's engine.** Pages render with WebKit, so playback is hardware-accelerated and energy-efficient, and AirPlay is available.
-- **Stays signed in.** Cookies persist between launches.
-- **Opens on the hoichoi home screen.** A Home button is always in the toolbar. You can choose to reopen the last page instead in Settings.
-- **Favorites.** Press ⌘D to save any show, movie or page to the sidebar. You can drag to reorder them.
-- **Recently Viewed.** The sidebar keeps a list of the titles you opened most recently.
-- **Hides the mouse pointer while you watch.** It disappears after 3 seconds without movement and comes back when you move the mouse.
-- **Simple player keys.** Space, the arrow keys, F, M and P work like they do on Netflix. A Playback menu adds playback speed.
-- **Handles links properly.** Sign-in popups (Google, Facebook, Apple) open in a small window. Links that leave hoichoi.tv open in your default browser.
-- **Zoom.** ⌘+ / ⌘− / ⌘0 change the page zoom, and trackpad back/forward swipes work.
-- **Private and sandboxed.** The app runs in the App Sandbox with network access only. It has no analytics or tracking of its own.
+- **A real Mac app.** It has its own window, Dock icon, sidebar, toolbar, menu bar and Settings, and supports light and dark mode.
+- **Starts on the hoichoi home screen**, and a Home button is always in the toolbar.
+- **Full screen with nothing on top.** The video fills the display. Press F, use the player's full screen button or click the green window button.
+- **The pointer gets out of the way.** While a video plays, the mouse pointer hides after 3 seconds and comes back when you move the mouse.
+- **Netflix-style keys.** Space plays and pauses, the arrow keys skip and change the volume, and F, M and P toggle full screen, mute and Picture in Picture.
+- **Stays signed in** between launches.
+- **Favorites and Recently Viewed.** Press ⌘D to pin any title to the sidebar.
+- **Safari's engine.** Playback is hardware-accelerated and battery-friendly, and AirPlay is supported.
+- **Works with sign-in and links.** Google, Facebook and Apple sign-in work in a popup. Links that leave hoichoi.tv open in your default browser.
+- **Private.** The app runs in the macOS App Sandbox and has no analytics or tracking of its own.
 
-### Keyboard shortcuts
+## Install
 
-While a video is playing, the app uses simple single-key controls, like Netflix:
+1. Download **[Hoichoi-for-Mac.dmg](https://github.com/BireshwarChakravarty/HoichoiforMac/releases/latest/download/Hoichoi-for-Mac.dmg)**.
+2. Open it and drag **Hoichoi for Mac** into **Applications**.
+3. The app isn't notarized by Apple, so macOS blocks it the first time you open it. To get past this:
+   - Right-click the app and choose **Open**, then click **Open** again.
+   - On macOS 15 or later, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+   - Or run this in Terminal:
+
+     ```bash
+     xattr -dr com.apple.quarantine "/Applications/Hoichoi for Mac.app"
+     ```
+
+You only need to do this once per version. To update, drag the new version into Applications and choose **Replace**.
+
+## Keyboard shortcuts
+
+While watching:
 
 | Key | Action |
 | --- | --- |
@@ -38,32 +51,33 @@ While a video is playing, the app uses simple single-key controls, like Netflix:
 | ← / → | Back / forward 10 seconds |
 | ↑ / ↓ | Volume up / down |
 | M | Mute / unmute |
-| F | Full screen: same as the player's own full screen button (Esc to exit) |
+| F | Full screen (Esc to exit) |
 | P | Picture in Picture |
 
-These keys only act on the main player. They don't fire while you type in a search box, and they don't affect looping preview clips.
+These keys only control the main player. They don't fire while you're typing, and they ignore the looping preview clips on browse pages.
 
-Everywhere else, the app uses the usual Mac shortcuts: ⌘[ / ⌘] for back and forward, ⇧⌘H for Home, ⌘R to reload, ⌘D to add a favorite, and ⌘+ / ⌘− / ⌘0 for zoom.
-**Help → Keyboard Shortcuts** (⌘/) shows the full list.
+Anywhere:
 
-## Install
+| Shortcut | Action |
+| --- | --- |
+| ⌘[ / ⌘] | Back / forward |
+| ⇧⌘H | Home |
+| ⌘R | Reload (⌥⌘R ignores the cache) |
+| ⌘D | Add to or remove from Favorites |
+| ⌘+ / ⌘− / ⌘0 | Zoom in / out / actual size |
+| ⌘, | Settings |
+| ⌘/ | Show all shortcuts |
 
-### Download a build
+## Good to know
 
-1. Download **[Hoichoi-for-Mac.dmg](https://github.com/BireshwarChakravarty/HoichoiforMac/releases/latest/download/Hoichoi-for-Mac.dmg)**, which is always the latest release.
-   You can also browse all versions, including zip downloads, on the [Releases](https://github.com/BireshwarChakravarty/HoichoiforMac/releases) page.
-2. Open the DMG and drag **Hoichoi for Mac** into **Applications**.
-3. The app is ad-hoc signed, not notarized by Apple, so Gatekeeper will block it the first time. Do one of the following:
-   - Right-click the app and choose **Open**, then click **Open** again. On macOS 15, go to **System Settings → Privacy & Security** and click **Open Anyway**.
-   - Or run this in Terminal:
+- **Picture quality is automatic.** hoichoi's protected streams play through Apple's own video player, the same one Safari uses. That player chooses the resolution from your connection speed and the size of the video on screen, and doesn't offer a quality menu. For the best picture, watch in full screen and give it a few seconds to ramp up.
+- **Screenshots of a playing video come out black.** macOS blocks screen capture of DRM-protected video. This is normal.
+- **If a page looks broken** (missing styling or an empty page), press ⌥⌘R to reload it without the cache. If that doesn't help, go to **Settings → Privacy** and clear website data. If hoichoi.tv also looks broken in Safari, the problem is on hoichoi's side.
+- **If a title won't play,** check whether it plays in Safari. The app can only play what Safari can. **Go → Open Page in Default Browser** opens the current page in your browser.
 
-     ```bash
-     xattr -dr com.apple.quarantine "/Applications/Hoichoi for Mac.app"
-     ```
+## Build from source
 
-### Build from source
-
-You need macOS 13 Ventura or later and Xcode 15 or later. The Command Line Tools are enough for `swift build`.
+You need macOS 13 or later and Xcode 15 or later. The Command Line Tools are enough.
 
 ```bash
 git clone https://github.com/BireshwarChakravarty/HoichoiforMac.git
@@ -77,63 +91,44 @@ cd HoichoiforMac
 make run
 ```
 
-`make run` builds the app for your Mac's architecture into `build/Hoichoi for Mac.app` and opens it. Other targets:
+`make run` builds the app for your Mac into `build/` and opens it. Other targets:
 
-- `make app` builds a universal (Apple silicon + Intel) app, plus a zip and a DMG in `dist/`.
-- `make debug` runs a debug build with `swift run`. You can inspect pages in any build from Safari's **Develop** menu.
-- `make icon` regenerates the app icon (needs Pillow).
+- `make app` builds a universal app plus a zip and a DMG in `dist/`.
+- `make debug` runs a debug build with `swift run`.
 
-You can also open `Package.swift` in Xcode and press Run.
+You can also open `Package.swift` in Xcode and press Run. To inspect pages, turn on Safari's **Develop** menu and pick **Hoichoi for Mac** under your Mac's name.
 
-### Use your own icon (personal builds)
-
-You can give your own copy of the app a different icon:
-
-1. Put a PNG or JPEG at `Resources/Custom/AppIcon.png`. A ready-made `.icns` also works, saved as `Resources/Custom/AppIcon.icns`.
-   Wide images such as wordmarks are centred on a white square. To use a different background colour, set it as a hex value, for example `CUSTOM_ICON_BACKGROUND=000000 make run`.
-2. Run `make run`.
-
-`Resources/Custom/` is git-ignored, and CI builds never use it, so a personal icon never ends up in the repository or in a public release.
-If you use another company's logo this way, keep that build to yourself.
+Releases are built by GitHub Actions. To publish a version, open **Actions → Build → Run workflow** and enter a tag such as `v1.1.0`.
 
 ## How it works
 
-The app uses Swift Package Manager and has no third-party dependencies.
+It's a Swift Package Manager project with no third-party dependencies.
 
 ```
 Sources/HoichoiForMac/
-├── HoichoiForMacApp.swift      # App entry point: main window + Settings scene
-├── ContentView.swift           # Split view, toolbar, loading/error/toast overlays
+├── HoichoiForMacApp.swift      # App entry point: main window and Settings
+├── ContentView.swift           # Split view, toolbar, full screen and overlays
 ├── SidebarView.swift           # Home, Favorites, Recently Viewed
-├── BrowserModel.swift          # Owns the WKWebView; navigation, playback controls, delegates
-├── PopupWindowController.swift # Windows for window.open() (social sign-in)
-├── LibraryStore.swift          # Favorites & recents, persisted in UserDefaults
-├── AppCommands.swift           # Menu bar + keyboard shortcuts
-├── SettingsView.swift          # Preferences
-├── WebView.swift               # NSViewRepresentable wrapper
-└── AppConfig.swift             # Constants, settings keys, helpers
-Resources/                      # Info.plist, entitlements, icon
-scripts/build-app.sh            # Builds, bundles, signs and zips the .app
+├── BrowserModel.swift          # Owns the web view: navigation, playback, pointer hiding
+├── PlayerShortcuts.swift       # Single-key player controls injected into the page
+├── PopupWindowController.swift # Popup windows for social sign-in
+├── LibraryStore.swift          # Favorites and recents
+├── AppCommands.swift           # Menu bar
+├── SettingsView.swift          # Settings
+├── WebView.swift               # WebKit view wrapper
+└── AppConfig.swift             # Constants and helpers
+Resources/                      # Info.plist, entitlements, app icon
+scripts/                        # Build, sign, package and icon scripts
 ```
 
-Playback controls work by running a small piece of JavaScript against the page's `<video>` element.
-The app doesn't call any private hoichoi API, and it doesn't touch the DRM-protected streams.
-
-## Known limitations
-
-- **Video playback depends on DRM.** hoichoi protects its streams with DRM. In this app they play
-  only through the same protected path Safari uses. If a title won't play here, check whether it
-  plays in Safari. If it doesn't play there either, the app can't fix it. In that case, use
-  **Go → Open Page in Default Browser** to watch in another browser.
-- The hoichoi website can change at any time. If something breaks, please [open an issue](https://github.com/BireshwarChakravarty/HoichoiforMac/issues).
-- The playback shortcuts only reach videos in the top-level page. A video inside an embedded frame won't respond to them.
-- Builds aren't notarized. If you have an Apple Developer ID, set `CODESIGN_IDENTITY` when you run `scripts/build-app.sh`, then notarize the zip.
+Player controls work by running a small script against the page's `<video>` element. The script runs in its own isolated JavaScript sandbox, so the page's scripts can't see or interfere with it. The app doesn't use any private hoichoi API, and it never touches the protected video streams.
 
 ## Contributing
 
-Issues and pull requests are welcome. Please keep the app lightweight: no third-party dependencies, no tracking, and no
-features that get around hoichoi's subscription or DRM.
+Issues and pull requests are welcome. Please keep the app lightweight: no third-party dependencies, no tracking, and nothing that gets around hoichoi's subscription or DRM.
+
+If something breaks, [open an issue](https://github.com/BireshwarChakravarty/HoichoiforMac/issues).
 
 ## License
 
-[MIT](LICENSE). "hoichoi" is a trademark of its respective owner and is used here only to describe what the app is for.
+[MIT](LICENSE). "hoichoi" is a trademark of its owner and is used here only to say what the app is for.
