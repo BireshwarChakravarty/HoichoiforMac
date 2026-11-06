@@ -58,6 +58,11 @@ struct ContentView: View {
             }
             .disabled(!browser.canGoForward)
             .help("Go forward")
+
+            Button { browser.goHome() } label: {
+                Label("Home", systemImage: "house")
+            }
+            .help("hoichoi home screen")
         }
 
         ToolbarItemGroup(placement: .primaryAction) {

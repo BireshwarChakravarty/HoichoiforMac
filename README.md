@@ -19,7 +19,7 @@ keyboard shortcuts and conveniences you'd expect from a Mac app.
 - **Native SwiftUI app.** Has its own window and Dock icon, a sidebar, a toolbar, a Settings window, full-screen support and light/dark mode.
 - **Uses Safari's engine.** Pages render with WebKit, so playback is hardware-accelerated and energy-efficient, and AirPlay is available.
 - **Stays signed in.** Cookies persist between launches.
-- **Picks up where you left off.** The app reopens the last page you were on (you can turn this off).
+- **Opens on the hoichoi home screen.** A Home button is always in the toolbar. You can choose to reopen the last page instead in Settings.
 - **Favorites.** Press ⌘D to save any show, movie or page to the sidebar. You can drag to reorder them.
 - **Recently Viewed.** The sidebar keeps a list of the titles you opened most recently.
 - **Simple player keys.** Space, the arrow keys, F, M and P work like they do on Netflix. A Playback menu adds playback speed.
@@ -79,7 +79,7 @@ make run
 `make run` builds the app for your Mac's architecture into `build/Hoichoi for Mac.app` and opens it. Other targets:
 
 - `make app` builds a universal (Apple silicon + Intel) app, plus a zip and a DMG in `dist/`.
-- `make debug` runs a debug build with `swift run`. The Safari Web Inspector is enabled in debug builds.
+- `make debug` runs a debug build with `swift run`. You can inspect pages in any build from Safari's **Develop** menu.
 - `make icon` regenerates the app icon (needs Pillow).
 
 You can also open `Package.swift` in Xcode and press Run.

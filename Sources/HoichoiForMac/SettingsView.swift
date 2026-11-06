@@ -14,7 +14,7 @@ struct SettingsView: View {
 
 private struct GeneralSettingsView: View {
     @AppStorage(SettingsKey.homeURL) private var homeURL = AppConfig.defaultHomeURL.absoluteString
-    @AppStorage(SettingsKey.restoreLastPage) private var restoreLastPage = true
+    @AppStorage(SettingsKey.restoreLastPage) private var restoreLastPage = false
     @AppStorage(SettingsKey.openExternalLinksInBrowser) private var openExternalLinks = true
 
     var body: some View {
@@ -32,7 +32,7 @@ private struct GeneralSettingsView: View {
             }
 
             Section {
-                Toggle("Reopen the last page when the app starts", isOn: $restoreLastPage)
+                Toggle("Reopen the last page instead of the home screen", isOn: $restoreLastPage)
                 Toggle("Open links outside hoichoi.tv in your default browser", isOn: $openExternalLinks)
             }
         }

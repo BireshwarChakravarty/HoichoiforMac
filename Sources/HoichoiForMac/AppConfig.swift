@@ -11,9 +11,21 @@ enum AppConfig {
     /// the user clicks can be handed off to the default browser.
     static let firstPartyDomains = ["hoichoi.tv"]
 
-    /// Appended to WebKit's default user agent so the site sees a regular Safari
-    /// browser (WebKit's bare user agent omits the `Version/… Safari/…` part).
-    static let safariApplicationName = "Version/18.0 Safari/605.1.15"
+    /// Appended to WebKit's default user agent so the site sees the same Safari
+    /// that ships with this Mac (WebKit's bare user agent omits the
+    /// `Version/… Safari/…` part). Safari's major version follows macOS:
+    /// macOS 13 → 16, 14 → 17, 15 → 18, and from macOS 26 they match.
+    static var safariApplicationName: String {
+        let macOS = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+        let safari: Int
+        switch macOS {
+        case ..<14: safari = 16
+        case 14: safari = 17
+        case 15...25: safari = 18
+        default: safari = macOS
+        }
+        return "Version/\(safari).0 Safari/605.1.15"
+    }
 
     static func isFirstParty(_ url: URL?) -> Bool {
         guard let host = url?.host?.lowercased() else { return false }
@@ -24,7 +36,7 @@ enum AppConfig {
         UserDefaults.standard.register(defaults: [
             SettingsKey.homeURL: defaultHomeURL.absoluteString,
             SettingsKey.openExternalLinksInBrowser: true,
-            SettingsKey.restoreLastPage: true,
+            SettingsKey.restoreLastPage: false,
         ])
     }
 }

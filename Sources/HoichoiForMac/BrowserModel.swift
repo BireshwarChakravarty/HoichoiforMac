@@ -41,11 +41,10 @@ final class BrowserModel: NSObject, ObservableObject {
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.allowsMagnification = true
-        #if DEBUG
+        // Lets you debug pages via Safari > Develop > [this Mac] > Hoichoi for Mac.
         if #available(macOS 13.3, *) {
             webView.isInspectable = true
         }
-        #endif
 
         PlayerShortcuts.install(
             in: webView.configuration.userContentController,
