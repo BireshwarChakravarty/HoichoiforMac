@@ -2,7 +2,7 @@
 # Builds "Hoichoi for Mac.app" into ./build and a zip into ./dist.
 #
 # Environment variables:
-#   VERSION            marketing version (default 0.1.0)
+#   VERSION            marketing version (default 1.0.0)
 #   BUILD_NUMBER       build number (default 1)
 #   ARCHS              space-separated architectures (default "arm64 x86_64" = universal)
 #   CODESIGN_IDENTITY  signing identity (default "-" = ad-hoc)
@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 
 EXECUTABLE="HoichoiForMac"
 APP="build/Hoichoi for Mac.app"
-VERSION="${VERSION:-0.1.0}"
+VERSION="${VERSION:-1.0.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 ARCHS="${ARCHS:-arm64 x86_64}"
 CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"

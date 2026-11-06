@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Publish a GitHub release with this tag (e.g. v0.1.0). Leave empty to only build."
+        description: "Publish a GitHub release with this tag (e.g. v1.0.0). Leave empty to only build."
         required: false
         default: ""
 
@@ -41,7 +41,7 @@ jobs:
             echo "tag=$TAG" >> "$GITHUB_OUTPUT"
             echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
           else
-            echo "version=0.1.0" >> "$GITHUB_OUTPUT"
+            echo "version=1.0.0" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build app
