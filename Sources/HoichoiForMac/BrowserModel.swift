@@ -47,6 +47,11 @@ final class BrowserModel: NSObject, ObservableObject {
         }
         #endif
 
+        PlayerShortcuts.install(
+            in: webView.configuration.userContentController,
+            handler: ScriptMessageProxy(model: self)
+        )
+
         bindWebViewState()
     }
 
@@ -312,6 +317,11 @@ extension BrowserModel: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         loadError = nil
         lastFailedURL = nil
+        // Give the page keyboard focus so Space, arrows, etc. work straight away,
+        // unless the user is focused somewhere else (e.g. the sidebar).
+        if let window = webView.window, window.firstResponder === window || window.firstResponder == nil {
+            window.makeFirstResponder(webView)
+        }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {

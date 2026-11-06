@@ -22,27 +22,28 @@ keyboard shortcuts and conveniences you'd expect from a Mac app.
 - **Picks up where you left off.** The app reopens the last page you were on (you can turn this off).
 - **Favorites.** Press ⌘D to save any show, movie or page to the sidebar. You can drag to reorder them.
 - **Recently Viewed.** The sidebar keeps a list of the titles you opened most recently.
-- **Playback menu and shortcuts.** Play/pause, skip ±10 s, mute, playback speed and Picture in Picture.
+- **Simple player keys.** Space, the arrow keys, F, M and P work like they do on Netflix. A Playback menu adds playback speed.
 - **Handles links properly.** Sign-in popups (Google, Facebook, Apple) open in a small window. Links that leave hoichoi.tv open in your default browser.
 - **Zoom.** ⌘+ / ⌘− / ⌘0 change the page zoom, and trackpad back/forward swipes work.
 - **Private and sandboxed.** The app runs in the App Sandbox with network access only. It has no analytics or tracking of its own.
 
 ### Keyboard shortcuts
 
-| Action | Shortcut |
+While a video is playing, the app uses simple single-key controls, like Netflix:
+
+| Key | Action |
 | --- | --- |
-| Back / Forward | ⌘[ / ⌘] |
-| Home | ⇧⌘H |
-| Reload | ⌘R |
-| Add to / remove from Favorites | ⌘D |
-| Copy page link | ⇧⌘C |
-| Open page in default browser | ⌥⌘O |
-| Play / Pause | ⌥⌘P |
-| Skip back / forward 10 s | ⌥⌘← / ⌥⌘→ |
-| Mute / Unmute | ⌥⌘M |
-| Picture in Picture | ⌃⌘P |
-| Zoom in / out / actual size | ⌘= / ⌘− / ⌘0 |
-| Enter full screen | ⌃⌘F |
+| Space or K | Play / pause |
+| ← / → | Back / forward 10 seconds |
+| ↑ / ↓ | Volume up / down |
+| M | Mute / unmute |
+| F | Full screen (Esc to exit) |
+| P | Picture in Picture |
+
+These keys only act on the main player. They don't fire while you type in a search box, and they don't affect looping preview clips.
+
+Everywhere else, the app uses the usual Mac shortcuts: ⌘[ / ⌘] for back and forward, ⇧⌘H for Home, ⌘R to reload, ⌘D to add a favorite, and ⌘+ / ⌘− / ⌘0 for zoom.
+**Help → Keyboard Shortcuts** (⌘/) shows the full list.
 
 ## Install
 

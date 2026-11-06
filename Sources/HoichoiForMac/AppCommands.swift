@@ -53,15 +53,14 @@ struct AppCommands: Commands {
                 .disabled(browser.currentURL == nil)
         }
 
+        // Playback keys are single keys handled inside the page (see
+        // PlayerShortcuts), so they never fire while you're typing. These menu
+        // items are for clicking and discovery.
         CommandMenu("Playback") {
-            Button("Play / Pause") { browser.togglePlayPause() }
-                .keyboardShortcut("p", modifiers: [.command, .option])
-            Button("Skip Back 10 Seconds") { browser.seek(by: -10) }
-                .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
-            Button("Skip Forward 10 Seconds") { browser.seek(by: 10) }
-                .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
-            Button("Mute / Unmute") { browser.toggleMute() }
-                .keyboardShortcut("m", modifiers: [.command, .option])
+            Button("Play / Pause  (Space)") { browser.togglePlayPause() }
+            Button("Back 10 Seconds  (\u{2190})") { browser.seek(by: -10) }
+            Button("Forward 10 Seconds  (\u{2192})") { browser.seek(by: 10) }
+            Button("Mute / Unmute  (M)") { browser.toggleMute() }
             Divider()
             Menu("Playback Speed") {
                 ForEach([0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { rate in
@@ -71,11 +70,13 @@ struct AppCommands: Commands {
                 }
             }
             Divider()
-            Button("Picture in Picture") { browser.togglePictureInPicture() }
-                .keyboardShortcut("p", modifiers: [.command, .control])
+            Button("Picture in Picture  (P)") { browser.togglePictureInPicture() }
         }
 
         CommandGroup(replacing: .help) {
+            Button("Keyboard Shortcuts") { showKeyboardShortcuts() }
+                .keyboardShortcut("/", modifiers: .command)
+            Divider()
             Button("\(AppConfig.appName) on GitHub") {
                 NSWorkspace.shared.open(AppConfig.repositoryURL)
             }
@@ -84,4 +85,27 @@ struct AppCommands: Commands {
             }
         }
     }
+}
+
+@MainActor
+private func showKeyboardShortcuts() {
+    let alert = NSAlert()
+    alert.messageText = "Keyboard Shortcuts"
+    alert.informativeText = """
+    While watching
+    Space or K  \u{2014}  play / pause
+    \u{2190} \u{2192}  \u{2014}  back / forward 10 seconds
+    \u{2191} \u{2193}  \u{2014}  volume
+    M  \u{2014}  mute
+    F  \u{2014}  full screen (Esc to exit)
+    P  \u{2014}  Picture in Picture
+
+    Anywhere
+    \u{2318}[ \u{2318}]  \u{2014}  back / forward
+    \u{21E7}\u{2318}H  \u{2014}  home
+    \u{2318}R  \u{2014}  reload
+    \u{2318}D  \u{2014}  add to Favorites
+    """
+    alert.addButton(withTitle: "OK")
+    alert.runModal()
 }
