@@ -38,6 +38,24 @@ enum PlayerShortcuts {
       };
       const notify = (text) => send({ toast: text });
 
+      // Tell the app whether a video is playing (used to hide the idle mouse
+      // pointer). Media events don't bubble, so listen in the capture phase.
+      // While playing, re-check every 2 s in case the player is removed from
+      // the page without a pause event.
+      let reportedPlaying = false;
+      const reportPlayback = () => {
+        const playing = Array.from(document.querySelectorAll('video'))
+          .some((v) => !v.paused && !v.ended && v.readyState > 2);
+        if (playing !== reportedPlaying) {
+          reportedPlaying = playing;
+          send({ playing });
+        }
+      };
+      ['play', 'playing', 'pause', 'ended', 'emptied', 'waiting'].forEach((type) => {
+        document.addEventListener(type, reportPlayback, true);
+      });
+      setInterval(() => { if (reportedPlaying) { reportPlayback(); } }, 2000);
+
       const isTyping = (el) => {
         if (!el) { return false; }
         if (el.isContentEditable) { return true; }
@@ -230,6 +248,9 @@ final class ScriptMessageProxy: NSObject, WKScriptMessageHandler {
               let model = self.model
         else { return }
 
+        if let playing = body["playing"] as? Bool {
+            model.setMediaPlaying(playing)
+        }
         if let text = body["toast"] as? String {
             model.showToast(text)
         }

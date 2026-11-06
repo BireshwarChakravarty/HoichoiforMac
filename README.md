@@ -22,6 +22,7 @@ keyboard shortcuts and conveniences you'd expect from a Mac app.
 - **Opens on the hoichoi home screen.** A Home button is always in the toolbar. You can choose to reopen the last page instead in Settings.
 - **Favorites.** Press ⌘D to save any show, movie or page to the sidebar. You can drag to reorder them.
 - **Recently Viewed.** The sidebar keeps a list of the titles you opened most recently.
+- **Hides the mouse pointer while you watch.** It disappears after 3 seconds without movement and comes back when you move the mouse.
 - **Simple player keys.** Space, the arrow keys, F, M and P work like they do on Netflix. A Playback menu adds playback speed.
 - **Handles links properly.** Sign-in popups (Google, Facebook, Apple) open in a small window. Links that leave hoichoi.tv open in your default browser.
 - **Zoom.** ⌘+ / ⌘− / ⌘0 change the page zoom, and trackpad back/forward swipes work.

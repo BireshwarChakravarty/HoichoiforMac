@@ -25,6 +25,14 @@ final class BrowserModel: NSObject, ObservableObject {
     private var toastTask: Task<Void, Never>?
     private var hasLoadedInitialPage = false
 
+    // Idle mouse pointer hiding while a video plays.
+    private var isMediaPlaying = false
+    private var cursorTimer: Timer?
+    private var lastMouseLocation = NSPoint.zero
+    private var mouseStillSince = Date()
+    private var cursorHiddenThisIdle = false
+    private let cursorIdleDelay: TimeInterval = 3
+
     override init() {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .default() // keeps you signed in between launches
@@ -116,6 +124,56 @@ final class BrowserModel: NSObject, ObservableObject {
     func zoomIn() { webView.pageZoom = min(webView.pageZoom + 0.1, 3.0) }
     func zoomOut() { webView.pageZoom = max(webView.pageZoom - 0.1, 0.5) }
     func resetZoom() { webView.pageZoom = 1.0 }
+
+    // MARK: - Idle cursor
+
+    /// While a video plays, hide the mouse pointer after a few seconds without
+    /// movement, like Netflix or QuickTime. It reappears as soon as the mouse moves.
+    func setMediaPlaying(_ playing: Bool) {
+        guard playing != isMediaPlaying else { return }
+        isMediaPlaying = playing
+        if playing {
+            startCursorTimer()
+        } else {
+            cursorTimer?.invalidate()
+            cursorTimer = nil
+        }
+    }
+
+    private func startCursorTimer() {
+        guard cursorTimer == nil else { return }
+        lastMouseLocation = NSEvent.mouseLocation
+        mouseStillSince = Date()
+        cursorHiddenThisIdle = false
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.checkCursorIdle() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        cursorTimer = timer
+    }
+
+    private func checkCursorIdle() {
+        let location = NSEvent.mouseLocation
+        if location != lastMouseLocation {
+            lastMouseLocation = location
+            mouseStillSince = Date()
+            cursorHiddenThisIdle = false
+            return
+        }
+        guard !cursorHiddenThisIdle,
+              Date().timeIntervalSince(mouseStillSince) >= cursorIdleDelay,
+              NSApp.isActive,
+              let window = webView.window, window.isKeyWindow
+        else { return }
+
+        // Only when the pointer is over the video page (works in a window, in
+        // window full screen and in the player's own full screen).
+        let frameOnScreen = window.convertToScreen(webView.convert(webView.bounds, to: nil))
+        guard frameOnScreen.contains(location) else { return }
+
+        NSCursor.setHiddenUntilMouseMoves(true)
+        cursorHiddenThisIdle = true
+    }
 
     // MARK: - Full screen
 
@@ -325,6 +383,7 @@ extension BrowserModel: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         loadError = nil
+        setMediaPlaying(false)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
