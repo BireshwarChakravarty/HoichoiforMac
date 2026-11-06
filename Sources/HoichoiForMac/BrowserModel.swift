@@ -40,6 +40,10 @@ final class BrowserModel: NSObject, ObservableObject {
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true
+        // Always fill the parent view, including WebKit's own video full screen
+        // window (see WebView.swift).
+        webView.translatesAutoresizingMaskIntoConstraints = true
+        webView.autoresizingMask = [.width, .height]
         webView.allowsMagnification = true
         // Lets you debug pages via Safari > Develop > [this Mac] > Hoichoi for Mac.
         if #available(macOS 13.3, *) {
