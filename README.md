@@ -18,7 +18,6 @@ A native macOS app for watching [hoichoi](https://www.hoichoi.tv), the Bengali m
 - **A real Mac app.** It has its own window, Dock icon, sidebar, toolbar, menu bar and Settings, and supports light and dark mode.
 - **Starts on the hoichoi home screen**, and a Home button is always in the toolbar.
 - **Full screen with nothing on top.** The video fills the display. Press F, use the player's full screen button or click the green window button.
-- **The pointer hides in full screen** after 3 seconds without movement, and comes back when you move the mouse.
 - **Netflix-style keys.** Space plays and pauses, the arrow keys skip and change the volume, and F, M and P toggle full screen, mute and Picture in Picture.
 - **Stays signed in** between launches.
 - **Favorites and Recently Viewed.** Press ⌘D to pin any title to the sidebar.
