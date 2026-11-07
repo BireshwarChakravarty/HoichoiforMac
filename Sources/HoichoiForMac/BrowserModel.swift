@@ -25,6 +25,12 @@ final class BrowserModel: NSObject, ObservableObject {
     private var toastTask: Task<Void, Never>?
     private var hasLoadedInitialPage = false
 
+    // Hides the idle mouse pointer in full screen (see `checkIdleCursor`).
+    private var cursorTimer: Timer?
+    private var lastMouseLocation = NSPoint.zero
+    private var mouseStillSince = Date()
+    private var cursorHiddenThisIdle = false
+
     override init() {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .default() // keeps you signed in between launches
@@ -56,6 +62,7 @@ final class BrowserModel: NSObject, ObservableObject {
         )
 
         bindWebViewState()
+        startIdleCursorWatcher()
     }
 
     // MARK: - Settings-backed values
@@ -120,6 +127,47 @@ final class BrowserModel: NSObject, ObservableObject {
     func zoomIn() { webView.pageZoom = min(webView.pageZoom + 0.1, 3.0) }
     func zoomOut() { webView.pageZoom = max(webView.pageZoom - 0.1, 0.5) }
     func resetZoom() { webView.pageZoom = 1.0 }
+
+    // MARK: - Idle cursor in full screen
+
+    /// In full screen (the app's or the player's own), hide the mouse pointer
+    /// after 3 seconds without movement. It comes back as soon as the mouse moves.
+    ///
+    /// This deliberately runs entirely on the app side: it doesn't inject
+    /// anything into the page and doesn't touch full screen itself. It only
+    /// reads the full screen state and the mouse position, and calls the
+    /// standard `NSCursor.setHiddenUntilMouseMoves`.
+    private func startIdleCursorWatcher() {
+        guard cursorTimer == nil else { return }
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.checkIdleCursor() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        cursorTimer = timer
+    }
+
+    private var isAnyFullScreen: Bool {
+        isWindowFullScreen || webView.fullscreenState == .inFullscreen
+    }
+
+    private func checkIdleCursor() {
+        let location = NSEvent.mouseLocation
+        if location != lastMouseLocation || !isAnyFullScreen {
+            lastMouseLocation = location
+            mouseStillSince = Date()
+            cursorHiddenThisIdle = false
+            return
+        }
+        guard !cursorHiddenThisIdle,
+              Date().timeIntervalSince(mouseStillSince) >= 3,
+              NSApp.isActive,
+              NSApp.modalWindow == nil,
+              webView.window?.isKeyWindow == true
+        else { return }
+
+        NSCursor.setHiddenUntilMouseMoves(true)
+        cursorHiddenThisIdle = true
+    }
 
     // MARK: - Full screen
 
